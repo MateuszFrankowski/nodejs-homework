@@ -1,11 +1,11 @@
-## GoIT Node.js Course Template Homework
+## Szablon kursu GoIT Node.js Praca domowa
 
-Виконайте форк цього репозиторію для виконання домашніх завдань (2-6)
-Форк створить репозиторій на вашому http://github.com
+Zrób fork tego repozytorium dla zadania domowego (2-6)
+Widelec utworzy repozytorium na Twojej stronie http://github.com.
 
-Додайте ментора до колаборації
+Dodaj mentora do współpracy
 
-Для кожної домашньої роботи створюйте свою гілку.
+Utwórz gałąź dla każdego zadania domowego.
 
 - hw02
 - hw03
@@ -13,19 +13,21 @@
 - hw05
 - hw06
 
-Кожна нова гілка для др повинна робитися з master
+Każdy nowy oddział dla dr powinien być utworzony z master
 
-Після того, як ви закінчили виконувати домашнє завдання у своїй гілці, необхідно зробити пулл-реквест (PR). Потім додати ментора для рев'ю коду. Тільки після того, як ментор заапрувить PR, ви можете виконати мердж гілки з домашнім завданням у майстер.
+Po zakończeniu pracy domowej w swojej gałęzi, należy wykonać pull request (PR). Następnie należy dodać mentora, który będzie recenzował kod. Dopiero gdy mentor zatwierdzi PR, możesz scalić gałąź z pracą domową do mastera.
 
-Уважно читайте коментарі ментора. Виправте зауваження та зробіть коміт у гілці з домашнім завданням. Зміни підтягнуться у PR автоматично після того, як ви відправите коміт з виправленнями на github
-Після виправлення знову додайте ментора на рев'ю коду.
+Przeczytaj uważnie komentarze mentora. Popraw komentarze i zrób commit w gałęzi z pracą domową. Zmiany zostaną automatycznie wciągnięte do PR po tym, jak wyślesz commit z poprawkami na githuba
+Po wprowadzeniu poprawek dodaj mentora do code review ponownie.
 
-- При здачі домашньої роботи є посилання на PR
-- JS-код чистий та зрозумілий, для форматування використовується Prettier
+- Przy wysyłaniu pracy domowej jest link do PR
+- Kod JS jest czysty i przejrzysty, do formatowania używany jest Prettier
 
-### Команди:
+### Polecenia:
 
-- `npm start` &mdash; старт сервера в режимі production
-- `npm run start:dev` &mdash; старт сервера в режимі розробки (development)
-- `npm run lint` &mdash; запустити виконання перевірки коду з eslint, необхідно виконувати перед кожним PR та виправляти всі помилки лінтера
-- `npm lint:fix` &mdash; та ж перевірка лінтера, але з автоматичними виправленнями простих помилок
+- `npm start` &mdash; uruchomienie serwera w trybie produkcyjnym.
+- `npm run start:dev` &mdash; uruchom serwer w trybie deweloperskim
+- `npm run lint` &mdash; uruchom wykonanie sprawdzania kodu za pomocą eslint, musi być wykonane przed każdym PR i naprawić wszystkie błędy lintera
+- `npm lint:fix` &mdash; to samo sprawdzanie kodu, ale z automatycznymi poprawkami dla prostych błędów
+
+
