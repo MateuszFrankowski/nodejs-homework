@@ -20,7 +20,7 @@ router.get("/:contactId", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   const { name, email, phone } = req.body;
   const schema = Joi.object({
-    name: Joi.string().alphanum().min(3).max(30).required(),
+    name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     phone: Joi.string()
       .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
@@ -53,7 +53,7 @@ router.put("/:contactId", async (req, res, next) => {
   const { name, email, phone } = req.body;
 
   const schema = Joi.object({
-    name: Joi.string().alphanum().min(3).max(30),
+    name: Joi.string().min(3).max(30),
     email: Joi.string().email(),
     phone: Joi.string()
       .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
