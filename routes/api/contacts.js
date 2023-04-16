@@ -2,8 +2,7 @@ const express = require("express");
 const contactsHandler = require("../../models/contacts.js");
 const router = express.Router();
 const Joi = require("joi");
-// const app = express();
-// app.use(express.json());
+
 router.get("/", async (req, res, next) => {
   const allContacts = await contactsHandler.listContacts();
   res.json({ allContacts: allContacts });
@@ -19,11 +18,12 @@ router.get("/:contactId", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   const { name, email, phone } = req.body;
+
   const schema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     phone: Joi.string()
-      .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
+      .regex(/^[+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
       .messages({
         "string.pattern.base": `Phone number must have at least 7 digits.`,
       })
