@@ -6,8 +6,8 @@ const contactSchema = new Schema({
     required: [true, "Set name for contact"],
     unique: true,
   },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
+  email: { type: String, required: [true, "Email is required"] },
+  phone: { type: String, required: [true, "Phone is required"] },
   favorite: { type: Boolean, default: false },
 });
 

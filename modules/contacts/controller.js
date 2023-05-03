@@ -1,16 +1,42 @@
 import * as ContactService from "./service.js";
 import Joi from "joi";
-export const getAll = async (req, res) => {
-  const contacts = await ContactService.getAll();
-  return res.json({ contacts });
+export const getAll = async (req, res, next) => {
+  try {
+    const results = await ContactService.getAll();
+    res.json({
+      status: "success",
+      code: 200,
+      data: {
+        contacts: results,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
-export const getById = async (req, res) => {
+export const getById = async (req, res, next) => {
   const id = req.params.id;
-  const requestedContact = await ContactService.getById(id);
-  if (!requestedContact) return res.sendStatus(404);
-  return res.json(requestedContact);
+  try {
+    const result = await ContactService.getById(id);
+    if (!result)
+      return res.status(404).json({
+        status: "error",
+        code: 404,
+        message: `Not found contact id: ${id}`,
+        data: "Not Found",
+      });
+    return res.json({
+      status: "success",
+      code: 200,
+      data: { contact: result },
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
-export const create = async (req, res) => {
+export const create = async (req, res, next) => {
   const { name, email, phone } = req.body;
   const schema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
@@ -29,8 +55,26 @@ export const create = async (req, res) => {
   });
 
   if (error) return res.status(400).json(error.details[0].message);
-  const createdContact = await ContactService.create(name, email, phone);
-  return res.status(201).json(createdContact);
+  try {
+    const result = await ContactService.create(name, email, phone);
+
+    if (result) {
+      return res.status(201).json({
+        status: "created",
+        code: 201,
+        data: { contact: result },
+      });
+    }
+
+    return res.json({
+      status: "400",
+      code: 400,
+      data: { contact: result },
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
 export const updateFavouriteFieldById = async (req, res) => {
   const id = req.params.id;
@@ -46,13 +90,13 @@ export const updateFavouriteFieldById = async (req, res) => {
   });
 
   if (error) return res.status(400).json({ message: error.details[0].message });
-  const updatedContact = await ContactService.updateFavouriteFieldById(
-    id,
-    favorite
-  );
-
-  if (updatedContact === undefined) return res.sendStatus(404);
-  return res.json(updatedContact);
+  const response = await ContactService.updateFavouriteFieldById(id, favorite);
+  try {
+    if (updatedContact) return res.json({ updatedContact: response });
+    return res.sendStatus(404);
+  } catch (e) {
+    console.error(e);
+  }
 };
 export const updateById = async (req, res) => {
   const id = req.params.id;
@@ -73,19 +117,25 @@ export const updateById = async (req, res) => {
   });
 
   if (error) return res.status(400).json({ message: error.details[0].message });
-  const updatedContact = await ContactService.updateById(
-    id,
-    name,
-    email,
-    phone
-  );
-  if (updatedContact === undefined) return res.sendStatus(404);
-  return res.json(updatedContact);
+  try {
+    const response = await ContactService.updateById(id, name, email, phone);
+
+    if (updatedContact) return res.json({ updatedContact: response });
+    return res.sendStatus(404);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
 
 export const deleteById = async (req, res) => {
   const id = req.params.id;
   const deletedContact = await ContactService.deleteByID(id);
-  if (!deletedContact) return res.sendStatus(404);
-  return res.json(deletedContact);
+  try {
+    if (!deletedContact) return res.sendStatus(404);
+    return res.json(deletedContact);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
