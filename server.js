@@ -19,6 +19,8 @@ process.on("SIGINT", () => {
 connection
   .then(() => {
     app.listen(PORT, () => {
+      console.log(`\n${new Date().toISOString()}`);
+      console.log(`Connected to the database.`);
       console.log(`Server running. Use our API on port: ${PORT}`);
     });
   })
