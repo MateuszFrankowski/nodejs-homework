@@ -19,10 +19,6 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
 });
 userSchema.methods.setPassword = function (password) {
   this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(6));
@@ -31,4 +27,4 @@ userSchema.methods.setPassword = function (password) {
 userSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
-export const User = model("user", userSchema);
+export const User = model("users", userSchema);
