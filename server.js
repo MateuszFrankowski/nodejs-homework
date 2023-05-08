@@ -1,9 +1,10 @@
 import { app } from "./app.js";
 import cors from "cors";
 import mongoose from "mongoose";
+import morgan from "morgan";
 import dotenv from "dotenv";
 app.use(cors());
-
+app.use(morgan("dev"));
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;

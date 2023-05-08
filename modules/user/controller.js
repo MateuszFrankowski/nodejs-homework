@@ -3,26 +3,34 @@ import jwt from "jsonwebtoken";
 import Joi from "joi";
 import dotenv from "dotenv";
 dotenv.config();
-import { ExtractJwt, Strategy } from "passport-jwt";
 import passport from "passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+
 const secret = process.env.SECRET;
 const strategyOptions = {
   secretOrKey: secret,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  passReqToCallback: true,
 };
 
 passport.use(
-  new Strategy(strategyOptions, (payload, done) => {
-    User.findOne({ _id: payload.id })
-      .then((user) =>
-        !user ? done(new Error("User not existing")) : done(null, user)
-      )
-      .catch(done);
+  new JwtStrategy(jwtOptions, function (req, payload, done) {
+    User.findById(payload._id, function (err, user) {
+      if (err) {
+        return done(err, false);
+      }
+
+      if (user) {
+        req.user = user; // <= Add this line
+        done(null, user);
+      } else {
+        done(null, false);
+      }
+    });
   })
 );
 export const auth = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user) => {
-    console.log(user);
     if (!user || err) {
       return res.status(401).json({
         status: "error",
@@ -51,7 +59,7 @@ export const login = async (req, res, next) => {
 
   if (error) return res.status(400).json(error.details[0].message);
   try {
-    const user = await userService.findUser(email);
+    const user = await userService.findUserByEmail(email);
     if (!user || !user.validPassword(password)) {
       return res.status(400).json({
         status: "error",
@@ -136,32 +144,11 @@ export const logout = async (req, res, next) => {
   const id = req.user;
 
   try {
-    const user = await userService.findUser(email);
-    if (!user || !user.validPassword(password)) {
-      return res.status(400).json({
-        status: "error",
-        code: 400,
-        message: "Incorrect login or password",
-        data: "Bad request",
-      });
-    }
+    await userService.saveToken(id, null);
 
-    const payload = {
-      _id: user.id,
-      useremail: user.email,
-    };
-
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
     res.json({
       status: "success",
-      code: 200,
-      data: {
-        token,
-        user: {
-          email: user.email,
-          subscription: user.subscription,
-        },
-      },
+      code: 204,
     });
   } catch (e) {
     console.error(e);
@@ -169,49 +156,19 @@ export const logout = async (req, res, next) => {
   }
 };
 export const current = async (req, res, next) => {
-  const { email, password } = req.body;
-  const schema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string()
-      .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))
-      .required(),
-  });
-  const { error } = schema.validate({
-    email: email,
-    password: password,
-  });
+  const id = req.user;
+  console.log(req.user);
+  const token = req.headers.authorization.replace("Bearer", "");
+  const user = await userService.findUserByToken(token);
 
-  if (error) return res.status(400).json(error.details[0].message);
-  try {
-    const user = await userService.findUser(email);
-    if (!user || !user.validPassword(password)) {
-      return res.status(400).json({
-        status: "error",
-        code: 400,
-        message: "Incorrect login or password",
-        data: "Bad request",
-      });
-    }
-
-    const payload = {
-      _id: user.id,
-      useremail: user.email,
-    };
-
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
-    res.json({
-      status: "success",
-      code: 200,
-      data: {
-        token,
-        user: {
-          email: user.email,
-          subscription: user.subscription,
-        },
+  res.json({
+    status: "success",
+    code: 200,
+    data: {
+      user: {
+        email: user.email,
+        subscription: user.subscription,
       },
-    });
-  } catch (e) {
-    console.error(e);
-    next(e);
-  }
+    },
+  });
 };

@@ -6,4 +6,4 @@ export const usersRouter = Router();
 usersRouter.post("/signup", userController.signup);
 usersRouter.post("/login", userController.login);
 usersRouter.get("/logout", auth, userController.logout);
-usersRouter.get("/logout", auth, userController.current);
+usersRouter.get("/current", auth, userController.current);
