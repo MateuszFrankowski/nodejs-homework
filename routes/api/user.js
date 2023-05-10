@@ -5,5 +5,6 @@ export const usersRouter = Router();
 
 usersRouter.post("/signup", userController.signup);
 usersRouter.post("/login", userController.login);
+usersRouter.patch("/", auth, userController.subscription);
 usersRouter.get("/logout", auth, userController.logout);
 usersRouter.get("/current", auth, userController.current);

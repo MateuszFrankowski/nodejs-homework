@@ -8,6 +8,15 @@ export const findUserByID = (id) => {
 export const findUserByToken = (token) => {
   return User.findOne({ token });
 };
+export const findUserByTokenAndUpdateSubscription = (token, subscription) => {
+  return User.findOneAndUpdate(
+    { token },
+    { subscription },
+    {
+      new: true,
+    }
+  );
+};
 export const saveToken = (id, token) => {
   return User.findOneAndUpdate({ _id: id }, { token: token });
 };

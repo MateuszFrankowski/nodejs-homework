@@ -1,8 +1,11 @@
 import * as ContactService from "./service.js";
 import Joi from "joi";
+
 export const getAll = async (req, res, next) => {
+  const { page, limit, favorite } = req.query;
+
   try {
-    const results = await ContactService.getAll();
+    const results = await ContactService.getAll(page, limit, favorite);
     res.json({
       status: "success",
       code: 200,
@@ -15,6 +18,7 @@ export const getAll = async (req, res, next) => {
     next(e);
   }
 };
+
 export const getById = async (req, res, next) => {
   const id = req.params.id;
   try {

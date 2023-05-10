@@ -10,28 +10,41 @@ const secret = process.env.SECRET;
 const strategyOptions = {
   secretOrKey: secret,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  passReqToCallback: true,
 };
 
 passport.use(
-  new JwtStrategy(jwtOptions, function (req, payload, done) {
-    User.findById(payload._id, function (err, user) {
-      if (err) {
-        return done(err, false);
-      }
-
-      if (user) {
-        req.user = user; // <= Add this line
-        done(null, user);
-      } else {
-        done(null, false);
-      }
-    });
+  new Strategy(strategyOptions, (payload, done) => {
+    User.findOne({ _id: payload.id })
+      .then((user) =>
+        !user ? done(new Error("User not existing")) : done(null, user)
+      )
+      .catch(done);
   })
 );
-export const auth = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, user) => {
-    if (!user || err) {
+// export const auth = (req, res, next) => {
+//   passport.authenticate("jwt", { session: false }, (err, user) => {
+//     console.log(user);
+//     if (!user || err) {
+//       return res.status(401).json({
+//         status: "error",
+//         code: 401,
+//         message: "Unauthorized",
+//         data: "Unauthorized",
+//       });
+//     }
+//     req.user = user;
+
+//     next();
+//   })(req, res, next);
+// };
+export const auth = async (req, res, next) => {
+  const token = req.headers["authorization"]?.slice(7);
+
+  try {
+    const tokenData = jwt.verify(token, secret, { complete: true });
+    const user = await userService.findUserByID(tokenData.payload.id);
+
+    if (!user) {
       return res.status(401).json({
         status: "error",
         code: 401,
@@ -42,7 +55,9 @@ export const auth = (req, res, next) => {
     req.user = user;
 
     next();
-  })(req, res, next);
+  } catch (error) {
+    next(error);
+  }
 };
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -95,7 +110,6 @@ export const login = async (req, res, next) => {
 
 export const signup = async (req, res, next) => {
   const { email, password } = req.body;
-
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string()
@@ -109,7 +123,7 @@ export const signup = async (req, res, next) => {
 
   if (error) return res.status(400).json(error.details[0].message);
   try {
-    const user = await userService.findUser(email);
+    const user = await userService.findUserByEmail(email);
     if (user) {
       return res.status(409).json({
         status: "error",
@@ -156,19 +170,64 @@ export const logout = async (req, res, next) => {
   }
 };
 export const current = async (req, res, next) => {
-  const id = req.user;
-  console.log(req.user);
-  const token = req.headers.authorization.replace("Bearer", "");
+  const { token } = req.user;
   const user = await userService.findUserByToken(token);
-
-  res.json({
-    status: "success",
-    code: 200,
-    data: {
-      user: {
-        email: user.email,
-        subscription: user.subscription,
+  if (user) {
+    return res.json({
+      status: "success",
+      code: 200,
+      data: {
+        user: {
+          email: user.email,
+          subscription: user.subscription,
+        },
       },
-    },
+    });
+  }
+  return res.status(401).json({
+    status: "error",
+    code: 401,
+    message: "Unauthorized",
+    data: "Unauthorized",
   });
+};
+
+export const subscription = async (req, res, next) => {
+  const { subscription } = req.body;
+  const { token } = req.user;
+  const schema = Joi.object({
+    subscription: Joi.string().valid("starter", "pro", "business").required(),
+  });
+  const { error } = schema.validate({
+    subscription: subscription,
+  });
+
+  if (error) return res.status(400).json(error.details[0].message);
+
+  try {
+    const user = await userService.findUserByTokenAndUpdateSubscription(
+      token,
+      subscription
+    );
+    if (user) {
+      return res.json({
+        status: "success",
+        code: 200,
+        data: {
+          user: {
+            subscription: user.subscription,
+          },
+        },
+      });
+    }
+    return res.status(401).json({
+      status: "error",
+      code: 401,
+      message: "Unauthorized",
+      data: "Unauthorized",
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
 };
