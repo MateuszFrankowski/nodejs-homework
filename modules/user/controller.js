@@ -1,4 +1,5 @@
 import * as userService from "./service.js";
+import { User } from "./model.js";
 import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
@@ -22,10 +23,18 @@ passport.use(
       .catch(done);
   })
 );
-export const auth = (req, res, next) => {
-  passport.authenticate("jwt", { session: false }, (err, user) => {
-    console.log("err", err, "user", user);
+export const auth = async (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, async (err, user) => {
     if (!user || err) {
+      return res.status(401).json({
+        status: "error",
+        code: 401,
+        message: "Unauthorized",
+        data: "Unauthorized",
+      });
+    }
+    const userbyID = await userService.findUserByID(user._id);
+    if (!userbyID || userbyID.token != user.token) {
       return res.status(401).json({
         status: "error",
         code: 401,
@@ -38,28 +47,7 @@ export const auth = (req, res, next) => {
     next();
   })(req, res, next);
 };
-// export const auth = async (req, res, next) => {
-//   const token = req.headers["authorization"]?.slice(7);
 
-//   try {
-//     const tokenData = jwt.verify(token, secret, { complete: true });
-//     const user = await userService.findUserByID(tokenData.payload.id);
-
-//     if (!user) {
-//       return res.status(401).json({
-//         status: "error",
-//         code: 401,
-//         message: "Unauthorized",
-//         data: "Unauthorized",
-//       });
-//     }
-//     req.user = user;
-
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const schema = Joi.object({
