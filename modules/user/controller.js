@@ -22,30 +22,10 @@ passport.use(
       .catch(done);
   })
 );
-// export const auth = (req, res, next) => {
-//   passport.authenticate("jwt", { session: false }, (err, user) => {
-//     console.log(user);
-//     if (!user || err) {
-//       return res.status(401).json({
-//         status: "error",
-//         code: 401,
-//         message: "Unauthorized",
-//         data: "Unauthorized",
-//       });
-//     }
-//     req.user = user;
-
-//     next();
-//   })(req, res, next);
-// };
-export const auth = async (req, res, next) => {
-  const token = req.headers["authorization"]?.slice(7);
-
-  try {
-    const tokenData = jwt.verify(token, secret, { complete: true });
-    const user = await userService.findUserByID(tokenData.payload.id);
-
-    if (!user) {
+export const auth = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, (err, user) => {
+    console.log("err", err, "user", user);
+    if (!user || err) {
       return res.status(401).json({
         status: "error",
         code: 401,
@@ -56,10 +36,30 @@ export const auth = async (req, res, next) => {
     req.user = user;
 
     next();
-  } catch (error) {
-    next(error);
-  }
+  })(req, res, next);
 };
+// export const auth = async (req, res, next) => {
+//   const token = req.headers["authorization"]?.slice(7);
+
+//   try {
+//     const tokenData = jwt.verify(token, secret, { complete: true });
+//     const user = await userService.findUserByID(tokenData.payload.id);
+
+//     if (!user) {
+//       return res.status(401).json({
+//         status: "error",
+//         code: 401,
+//         message: "Unauthorized",
+//         data: "Unauthorized",
+//       });
+//     }
+//     req.user = user;
+
+//     next();
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const schema = Joi.object({
