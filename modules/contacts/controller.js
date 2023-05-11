@@ -59,6 +59,7 @@ export const create = async (req, res, next) => {
   });
 
   if (error) return res.status(400).json(error.details[0].message);
+
   try {
     const result = await ContactService.create(name, email, phone);
 

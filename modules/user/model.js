@@ -15,6 +15,7 @@ const userSchema = new Schema({
     enum: ["starter", "pro", "business"],
     default: "starter",
   },
+  avatarURL: String,
   token: {
     type: String,
     default: null,
@@ -27,4 +28,4 @@ userSchema.methods.setPassword = function (password) {
 userSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
-export const User = model("users", userSchema);
+export const User = model("user", userSchema);

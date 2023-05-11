@@ -1,4 +1,5 @@
 import * as userService from "./service.js";
+import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import dotenv from "dotenv";
@@ -122,6 +123,7 @@ export const signup = async (req, res, next) => {
   });
 
   if (error) return res.status(400).json(error.details[0].message);
+
   try {
     const user = await userService.findUserByEmail(email);
     if (user) {
@@ -132,14 +134,14 @@ export const signup = async (req, res, next) => {
         data: "Conflict",
       });
     }
-  } catch (e) {
-    console.error(e);
-    next(e);
-  }
-  try {
-    const newUser = await userService.register(email, password);
-    const { email: emailRegistered, subscription: subscriptionRegistered } =
-      newUser;
+    const avatarURL = gravatar.url(email);
+    const newUser = await userService.register(email, password, avatarURL);
+    const {
+      email: emailRegistered,
+      subscription: subscriptionRegistered,
+      avatarURL: avatarURLRegistered,
+    } = newUser;
+
     res.status(201).json({
       status: "success",
       code: 201,
@@ -147,6 +149,7 @@ export const signup = async (req, res, next) => {
         user: {
           email: emailRegistered,
           subscription: subscriptionRegistered,
+          avatarURL: avatarURLRegistered,
         },
       },
     });
