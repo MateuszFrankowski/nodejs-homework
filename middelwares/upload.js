@@ -1,5 +1,4 @@
 import createHttpError from "http-errors";
-import { Express } from "express";
 import path from "path";
 import fs from "fs/promises";
 import multer from "multer";
@@ -21,19 +20,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-});
-
-app.post("/upload", upload.single("picture"), async (req, res, next) => {
-  const { description } = req.body;
-  const { path: temporaryName, originalname } = req.file;
-  const fileName = path.join(storeAvatar, originalname);
-  try {
-    await fs.rename(temporaryName, fileName);
-  } catch (err) {
-    await fs.unlink(temporaryName);
-    return next(err);
-  }
-  res.json({ description, message: "Plik załadowany pomyślnie", status: 200 });
 });
 
 // catch 404 and forward to error handler
@@ -58,11 +44,3 @@ const createFolderIsNotExist = async (folder) => {
     await fs.mkdir(folder);
   }
 };
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, async () => {
-  createFolderIsNotExist(uploadDir);
-  createFolderIsNotExist(storeAvatar);
-  console.log(`Server running. Use on port:${PORT}`);
-});

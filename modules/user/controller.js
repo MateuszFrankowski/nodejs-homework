@@ -25,16 +25,8 @@ passport.use(
 );
 export const auth = async (req, res, next) => {
   passport.authenticate("jwt", { session: false }, async (err, user) => {
-    if (!user || err) {
-      return res.status(401).json({
-        status: "error",
-        code: 401,
-        message: "Unauthorized",
-        data: "Unauthorized",
-      });
-    }
-    const userbyID = await userService.findUserByID(user._id);
-    if (!userbyID || userbyID.token != user.token) {
+    const reqToken = req.headers["authorization"]?.slice(7);
+    if (!user || err || user.token !== reqToken) {
       return res.status(401).json({
         status: "error",
         code: 401,
@@ -43,7 +35,6 @@ export const auth = async (req, res, next) => {
       });
     }
     req.user = user;
-
     next();
   })(req, res, next);
 };
@@ -161,25 +152,15 @@ export const logout = async (req, res, next) => {
   }
 };
 export const current = async (req, res, next) => {
-  const { token } = req.user;
-  const user = await userService.findUserByToken(token);
-  if (user) {
-    return res.json({
-      status: "success",
-      code: 200,
-      data: {
-        user: {
-          email: user.email,
-          subscription: user.subscription,
-        },
+  return res.json({
+    status: "success",
+    code: 200,
+    data: {
+      user: {
+        email: req.user.email,
+        subscription: req.user.subscription,
       },
-    });
-  }
-  return res.status(401).json({
-    status: "error",
-    code: 401,
-    message: "Unauthorized",
-    data: "Unauthorized",
+    },
   });
 };
 
