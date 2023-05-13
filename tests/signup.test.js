@@ -1,6 +1,6 @@
 const request = require("supertest");
 const express = require("express");
-import { Router } from "express";
+
 const authFnc = require("../modules/user/controller.js");
 const mongoose = require("mongoose");
 const app = express();
@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // create a router for the auth routes
-const authRouter = Router();
+const authRouter = express.Router();
 
 // define routes in authRouter
 authRouter.post("/signup", async (req, res) => {
