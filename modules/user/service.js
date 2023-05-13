@@ -20,6 +20,9 @@ export const findUserByTokenAndUpdateSubscription = (token, subscription) => {
 export const saveToken = (id, token) => {
   return User.findOneAndUpdate({ _id: id }, { token: token });
 };
+export const saveAvatarURL = (id, avatarURL) => {
+  return User.findOneAndUpdate({ _id: id }, { avatarURL: avatarURL });
+};
 
 export const register = (email, password, avatarURL) => {
   const newUser = new User({ email, password, avatarURL });
