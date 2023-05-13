@@ -1,9 +1,13 @@
 import { app } from "./app.js";
 import cors from "cors";
 import mongoose from "mongoose";
+import morgan from "morgan";
 import dotenv from "dotenv";
+import path from "path";
+const storeAvatar = path.join(process.cwd(), "public", "avatars");
+const uploadDir = path.join(process.cwd(), "public", "uploads");
 app.use(cors());
-
+app.use(morgan("dev"));
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
@@ -19,6 +23,10 @@ process.on("SIGINT", () => {
 connection
   .then(() => {
     app.listen(PORT, () => {
+      // createFolderIsNotExist(uploadDir);
+      // createFolderIsNotExist(storeAvatar);
+      console.log(`\n${new Date().toISOString()}`);
+      console.log(`Connected to the database.`);
       console.log(`Server running. Use our API on port: ${PORT}`);
     });
   })

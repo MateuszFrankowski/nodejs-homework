@@ -1,11 +1,16 @@
 import { Router } from "express";
-
+import { auth } from "../../modules/user/controller.js";
 import * as ContactController from "../../modules/contacts/controller.js";
-export const router = Router();
+export const contactsRouter = Router();
 
-router.get("/", ContactController.getAll);
-router.get("/:id", ContactController.getById);
-router.post("/", ContactController.create);
-router.patch("/:id/favorite", ContactController.updateFavouriteFieldById);
-router.put("/:id", ContactController.updateById);
-router.delete("/:id", ContactController.deleteById);
+contactsRouter.get("/", ContactController.getAll);
+
+contactsRouter.get("/:id", auth, ContactController.getById);
+contactsRouter.post("/", auth, ContactController.create);
+
+contactsRouter.patch(
+  "/:id/favorite",
+  ContactController.updateFavouriteFieldById
+);
+contactsRouter.put("/:id", auth, ContactController.updateById);
+contactsRouter.delete("/:id", auth, ContactController.deleteById);

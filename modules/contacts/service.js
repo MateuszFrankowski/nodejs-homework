@@ -1,6 +1,14 @@
 import { Contact } from "./model.js";
-export const getAll = () => {
-  return Contact.find({});
+
+export const getAll = (pageNr = 1, nPerPage = 0, favorite) => {
+  let filter = {};
+  if (favorite != undefined) {
+    filter = { favorite };
+  }
+
+  return Contact.find(filter)
+    .skip(nPerPage * (pageNr - 1))
+    .limit(nPerPage);
 };
 export const getById = (id) => {
   return Contact.findOne({ _id: id });
