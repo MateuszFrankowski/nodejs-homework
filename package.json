@@ -7,9 +7,11 @@
     "start": "cross-env NODE_ENV=production node ./server.js",
     "dev": "cross-env NODE_ENV=development nodemon ./server.js",
     "lint": "eslint **/*.js",
-    "lint:fix": "eslint --fix **/*.js"
+    "lint:fix": "eslint --fix **/*.js",
+    "test": "jest"
   },
   "dependencies": {
+    "@babel/preset-typescript": "^7.21.5",
     "bcrypt": "^5.1.0",
     "colors": "^1.4.0",
     "cors": "2.8.5",
@@ -19,6 +21,7 @@
     "express": "^4.18.2",
     "gravatar": "^1.8.2",
     "http-errors": "^2.0.0",
+    "jimp": "^0.22.8",
     "joi": "^17.9.1",
     "joi-phone-number": "^5.1.1",
     "jsonwebtoken": "^9.0.0",
@@ -32,12 +35,30 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "babel-jest": "^29.5.0",
     "eslint": "7.19.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "16.0.3",
     "eslint-plugin-import": "2.25.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "5.2.0",
-    "nodemon": "^2.0.22"
-  }
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  },
+  "description": "Zrób fork tego repozytorium dla zadania domowego (2-6)\r Widelec utworzy repozytorium na Twojej stronie http://github.com.",
+  "main": ".eslintrc.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MateuszFrankowski/nodejs-homework.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MateuszFrankowski/nodejs-homework/issues"
+  },
+  "homepage": "https://github.com/MateuszFrankowski/nodejs-homework#readme"
 }
