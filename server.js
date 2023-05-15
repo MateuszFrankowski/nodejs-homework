@@ -3,7 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import express from "express";
+
 import {
   createFolderIsNotExist,
   uploadDir,

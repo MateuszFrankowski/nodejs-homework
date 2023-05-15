@@ -5,8 +5,8 @@ export const findUserByEmail = (email) => {
 export const findUserByverificationTokenAndVerify = (verificationToken) => {
   return User.findOneAndUpdate(
     { verificationToken },
-    { verificationToken: null },
-    { verify: true },
+    { verificationToken: null, verify: true },
+
     {
       new: true,
     }

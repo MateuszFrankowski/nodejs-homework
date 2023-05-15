@@ -129,9 +129,9 @@ export const signup = async (req, res, next) => {
     } = newUser;
     const msg = {
       to: emailRegistered,
-      from: "mateuszfrankowski91@gmail.com",
+      from: "contactsapp@op.pl",
       subject: "Please Verify Your Account",
-      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/app/users/verify/:${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
+      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/api/users/verify/${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
     };
     sgMail
       .send(msg)
@@ -249,6 +249,7 @@ export const verifiy = async (req, res, next) => {
         data: "Conflict",
       });
     }
+
     if (user.verify) {
       return res.status(400).json({
         status: "error",
@@ -263,9 +264,9 @@ export const verifiy = async (req, res, next) => {
 
     const msg = {
       to: email,
-      from: "mateuszfrankowski91@gmail.com",
+      from: "contactsapp@op.pl",
       subject: "Please Verify Your Account",
-      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/app/users/verify/:${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
+      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/api/users/verify/${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
     };
     sgMail
       .send(msg)
