@@ -1,13 +1,15 @@
 import * as userService from "./service.js";
+import { nanoid } from "nanoid";
 import { User } from "./model.js";
 import gravatar from "gravatar";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
 import dotenv from "dotenv";
+import sgMail from "@sendgrid/mail";
 dotenv.config();
 import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-
+sgMail.setApiKey(process.env.SEND_GRID_PASSWORD);
 const secret = process.env.SECRET;
 const strategyOptions = {
   secretOrKey: secret,
@@ -26,7 +28,7 @@ passport.use(
 export const auth = async (req, res, next) => {
   passport.authenticate("jwt", { session: false }, async (err, user) => {
     const reqToken = req.headers["authorization"]?.slice(7);
-    if (!user || err || user.token !== reqToken) {
+    if (!user || err || user.token !== reqToken || user.verify === false) {
       return res.status(401).json({
         status: "error",
         code: 401,
@@ -34,7 +36,6 @@ export const auth = async (req, res, next) => {
         data: "Unauthorized",
       });
     }
-    req.user = user;
     next();
   })(req, res, next);
 };
@@ -114,13 +115,39 @@ export const signup = async (req, res, next) => {
       });
     }
     const avatarURL = gravatar.url(email);
-    const newUser = await userService.register(email, password, avatarURL);
+    const verificationToken = nanoid();
+    const newUser = await userService.register(
+      email,
+      password,
+      avatarURL,
+      verificationToken
+    );
     const {
       email: emailRegistered,
       subscription: subscriptionRegistered,
       avatarURL: avatarURLRegistered,
     } = newUser;
-
+    const msg = {
+      to: emailRegistered,
+      from: "contactsapp@op.pl",
+      subject: "Please Verify Your Account",
+      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/api/users/verify/${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+        return res.json({
+          status: "Internal Server Error",
+          code: 500,
+          ResponseBody: {
+            message: "Email sent Error",
+          },
+        });
+      });
     res.status(201).json({
       status: "success",
       code: 201,
@@ -162,6 +189,110 @@ export const current = async (req, res, next) => {
       },
     },
   });
+};
+export const verificationToken = async (req, res, next) => {
+  const verificationToken = req.params.verificationToken;
+  console.log(verificationToken);
+  const schema = Joi.object({
+    verificationToken: Joi.string().required(),
+  });
+  const { error } = schema.validate({
+    verificationToken: verificationToken,
+  });
+
+  if (error) return res.status(400).json(error.details[0].message);
+
+  try {
+    const user = await userService.findUserByverificationTokenAndVerify(
+      verificationToken
+    );
+    if (user) {
+      return res.json({
+        status: "success",
+        code: 200,
+        ResponseBody: {
+          message: "Verification successful",
+        },
+      });
+    }
+    return res.status(401).json({
+      status: "error",
+      code: 401,
+      ResponseBody: {
+        message: "User not found",
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+export const verifiy = async (req, res, next) => {
+  const { email } = req.body;
+
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+  });
+  const { error } = schema.validate({
+    email: email,
+  });
+
+  if (error) return res.status(400).json(error.details[0].message);
+
+  try {
+    const user = await userService.findUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        code: 401,
+        message: "no user found",
+        data: "Conflict",
+      });
+    }
+
+    if (user.verify) {
+      return res.status(400).json({
+        status: "error",
+        code: 400,
+        message: "Verification has already been passed",
+        data: "Conflict",
+      });
+    }
+
+    const verificationToken = nanoid();
+    await userService.findUserByEmailAndRenevToken(email, verificationToken);
+
+    const msg = {
+      to: email,
+      from: "contactsapp@op.pl",
+      subject: "Please Verify Your Account",
+      html: `<p>Hello,</p><p>Thank you for signing up! Please click on the following link to verify your account:</p><p><a href="http://localhost:3000/api/users/verify/${verificationToken}">Verify</a></p><p>Best regards,</p><p>Contacts APP Team</p>`,
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+        return res.json({
+          status: "Internal Server Error",
+          code: 500,
+          ResponseBody: {
+            message: "Email sent Error",
+          },
+        });
+      });
+    res.status(200).json({
+      status: "success",
+      code: 200,
+      ResponseBody: {
+        message: "Verification email sent",
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const subscription = async (req, res, next) => {
